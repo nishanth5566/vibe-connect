@@ -2,6 +2,7 @@ import { Settings, Edit3, LogOut, MapPin, Briefcase, Heart, Calendar } from "luc
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { UserProfile } from "@/pages/MainApp";
+import { vibeOptions } from "@/data/vibes";
 
 interface ProfileViewProps {
   userProfile: UserProfile;
@@ -9,8 +10,9 @@ interface ProfileViewProps {
 }
 
 const ProfileView = ({ userProfile, onLogout }: ProfileViewProps) => {
-  // Default vibes - in a real app these would come from onboarding
-  const vibes = ["Cafés", "Music", "Art", "Travel"];
+  // Get vibes from user profile
+  const userVibes = userProfile.vibes || [];
+  const vibeLabels = userVibes.map(id => vibeOptions.find(v => v.id === id)).filter(Boolean);
 
   const getGenderLabel = (gender: string) => {
     const labels: Record<string, string> = {
@@ -108,14 +110,19 @@ const ProfileView = ({ userProfile, onLogout }: ProfileViewProps) => {
             <h3 className="font-semibold text-foreground">My Vibes</h3>
           </div>
           <div className="flex flex-wrap gap-2">
-            {vibes.map((vibe) => (
-              <span
-                key={vibe}
-                className="px-4 py-2 text-sm font-medium rounded-full bg-vibe-tag text-vibe-tag-text"
-              >
-                {vibe}
-              </span>
-            ))}
+            {vibeLabels.length > 0 ? (
+              vibeLabels.map((vibe) => (
+                <span
+                  key={vibe?.id}
+                  className="px-4 py-2 text-sm font-medium rounded-full bg-vibe-tag text-vibe-tag-text flex items-center gap-1"
+                >
+                  <span>{vibe?.emoji}</span>
+                  {vibe?.label}
+                </span>
+              ))
+            ) : (
+              <span className="text-sm text-muted-foreground">No vibes selected yet</span>
+            )}
           </div>
         </div>
 
