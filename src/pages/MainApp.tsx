@@ -11,6 +11,7 @@ export interface UserProfile {
   age: string;
   gender: string;
   bio: string;
+  vibes: string[];
   email: string;
   createdAt: string;
 }

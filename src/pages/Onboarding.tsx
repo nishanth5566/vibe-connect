@@ -1,46 +1,47 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { ChevronRight, ChevronLeft, User, Calendar, Users, FileText, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChevronRight, Check, User, Calendar, Users, FileText, Sparkles } from "lucide-react";
+import OnboardingHeader from "@/components/onboarding/OnboardingHeader";
+import StepIndicators from "@/components/onboarding/StepIndicators";
+import NameStep from "@/components/onboarding/NameStep";
+import AgeStep from "@/components/onboarding/AgeStep";
+import GenderStep from "@/components/onboarding/GenderStep";
+import BioStep from "@/components/onboarding/BioStep";
+import VibesStep from "@/components/onboarding/VibesStep";
 
 const steps = [
   { id: 1, title: "What's your name?", icon: User },
   { id: 2, title: "How old are you?", icon: Calendar },
   { id: 3, title: "What's your gender?", icon: Users },
   { id: 4, title: "Tell us about yourself", icon: FileText },
-];
-
-const genderOptions = [
-  { value: "male", label: "Male", emoji: "👨" },
-  { value: "female", label: "Female", emoji: "👩" },
-  { value: "non-binary", label: "Non-binary", emoji: "🧑" },
-  { value: "prefer-not", label: "Prefer not to say", emoji: "🤫" },
+  { id: 5, title: "What's your vibe?", icon: Sparkles },
 ];
 
 const Onboarding = () => {
   const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     age: "",
     gender: "",
     bio: "",
+    vibes: [] as string[],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Smooth scroll to current step
   useEffect(() => {
     if (scrollContainerRef.current) {
+      setIsTransitioning(true);
       const stepWidth = scrollContainerRef.current.offsetWidth;
       scrollContainerRef.current.scrollTo({
         left: currentStep * stepWidth,
         behavior: "smooth",
       });
+      setTimeout(() => setIsTransitioning(false), 400);
     }
   }, [currentStep]);
 
@@ -59,8 +60,8 @@ const Onboarding = () => {
         const age = parseInt(formData.age);
         if (!formData.age) {
           newErrors.age = "Please enter your age";
-        } else if (isNaN(age) || age < 13 || age > 120) {
-          newErrors.age = "Please enter a valid age (13-120)";
+        } else if (isNaN(age) || age < 18 || age > 120) {
+          newErrors.age = "You must be 18 or older";
         }
         break;
       case 2:
@@ -73,6 +74,11 @@ const Onboarding = () => {
           newErrors.bio = "Please tell us a bit about yourself";
         } else if (formData.bio.length > 200) {
           newErrors.bio = "Bio must be less than 200 characters";
+        }
+        break;
+      case 4:
+        if (formData.vibes.length === 0) {
+          newErrors.vibes = "Please select at least 1 vibe";
         }
         break;
     }
@@ -104,69 +110,34 @@ const Onboarding = () => {
     }
   };
 
-  const progress = ((currentStep + 1) / steps.length) * 100;
+  const getButtonText = () => {
+    if (currentStep === steps.length - 1) {
+      return (
+        <>
+          <Sparkles className="w-5 h-5 mr-2" />
+          Let's Go!
+        </>
+      );
+    }
+    return (
+      <>
+        Continue
+        <ChevronRight className="w-5 h-5 ml-2" />
+      </>
+    );
+  };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 flex flex-col">
       {/* Progress Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-lg border-b border-border">
-        <div className="px-4 py-4 max-w-md mx-auto">
-          {/* Back button & Step indicator */}
-          <div className="flex items-center justify-between mb-3">
-            <button
-              onClick={handleBack}
-              disabled={currentStep === 0}
-              className={cn(
-                "flex items-center gap-1 text-sm font-medium transition-colors",
-                currentStep === 0
-                  ? "text-muted-foreground/50 cursor-not-allowed"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Back
-            </button>
-            <span className="text-sm text-muted-foreground">
-              Step {currentStep + 1} of {steps.length}
-            </span>
-          </div>
-
-          {/* Progress bar */}
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full gradient-primary transition-all duration-500 ease-out rounded-full"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
-      </div>
+      <OnboardingHeader
+        currentStep={currentStep}
+        totalSteps={steps.length}
+        onBack={handleBack}
+      />
 
       {/* Step Icons */}
-      <div className="flex justify-center gap-4 py-6">
-        {steps.map((step, index) => {
-          const Icon = step.icon;
-          const isActive = index === currentStep;
-          const isComplete = index < currentStep;
-
-          return (
-            <div
-              key={step.id}
-              className={cn(
-                "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300",
-                isActive && "gradient-primary scale-110 shadow-lg",
-                isComplete && "bg-success text-primary-foreground",
-                !isActive && !isComplete && "bg-muted text-muted-foreground"
-              )}
-            >
-              {isComplete ? (
-                <Check className="w-5 h-5 text-primary-foreground" />
-              ) : (
-                <Icon className={cn("w-5 h-5", isActive && "text-primary-foreground")} />
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <StepIndicators steps={steps} currentStep={currentStep} />
 
       {/* Scrollable Steps Container */}
       <div
@@ -177,174 +148,75 @@ const Onboarding = () => {
         <div className="flex" style={{ width: `${steps.length * 100}%` }}>
           {/* Step 1: Name */}
           <div
-            className="w-full px-6 flex flex-col items-center"
+            className="w-full px-6 flex flex-col items-center justify-start pt-4"
             style={{ scrollSnapAlign: "start", flex: `0 0 ${100 / steps.length}%` }}
           >
-            <div className="w-full max-w-md animate-fade-in">
-              <h2 className="text-2xl font-bold text-foreground text-center mb-2">
-                What's your name?
-              </h2>
-              <p className="text-muted-foreground text-center mb-8">
-                This is how others will see you
-              </p>
-
-              <div className="space-y-2">
-                <Label htmlFor="name">Your name</Label>
-                <Input
-                  id="name"
-                  placeholder="Enter your name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value.slice(0, 50) })
-                  }
-                  className="h-14 rounded-xl bg-card border-border text-lg"
-                  autoFocus
-                />
-                {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name}</p>
-                )}
-                <p className="text-xs text-muted-foreground text-right">
-                  {formData.name.length}/50
-                </p>
-              </div>
-            </div>
+            <NameStep
+              value={formData.name}
+              onChange={(value) => setFormData({ ...formData, name: value })}
+              error={errors.name}
+            />
           </div>
 
           {/* Step 2: Age */}
           <div
-            className="w-full px-6 flex flex-col items-center"
+            className="w-full px-6 flex flex-col items-center justify-start pt-4"
             style={{ scrollSnapAlign: "start", flex: `0 0 ${100 / steps.length}%` }}
           >
-            <div className="w-full max-w-md animate-fade-in">
-              <h2 className="text-2xl font-bold text-foreground text-center mb-2">
-                How old are you?
-              </h2>
-              <p className="text-muted-foreground text-center mb-8">
-                We'll show you people in your age group
-              </p>
-
-              <div className="space-y-2">
-                <Label htmlFor="age">Your age</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  placeholder="Enter your age"
-                  value={formData.age}
-                  onChange={(e) =>
-                    setFormData({ ...formData, age: e.target.value.slice(0, 3) })
-                  }
-                  className="h-14 rounded-xl bg-card border-border text-lg text-center"
-                  min={13}
-                  max={120}
-                />
-                {errors.age && (
-                  <p className="text-sm text-destructive">{errors.age}</p>
-                )}
-              </div>
-            </div>
+            <AgeStep
+              value={formData.age}
+              onChange={(value) => setFormData({ ...formData, age: value })}
+              error={errors.age}
+            />
           </div>
 
           {/* Step 3: Gender */}
           <div
-            className="w-full px-6 flex flex-col items-center"
+            className="w-full px-6 flex flex-col items-center justify-start pt-4"
             style={{ scrollSnapAlign: "start", flex: `0 0 ${100 / steps.length}%` }}
           >
-            <div className="w-full max-w-md animate-fade-in">
-              <h2 className="text-2xl font-bold text-foreground text-center mb-2">
-                What's your gender?
-              </h2>
-              <p className="text-muted-foreground text-center mb-8">
-                Help us personalize your experience
-              </p>
-
-              <div className="grid grid-cols-2 gap-3">
-                {genderOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => setFormData({ ...formData, gender: option.value })}
-                    className={cn(
-                      "p-4 rounded-2xl border-2 transition-all duration-200 flex flex-col items-center gap-2",
-                      formData.gender === option.value
-                        ? "border-primary bg-secondary"
-                        : "border-border bg-card hover:border-primary/50"
-                    )}
-                  >
-                    <span className="text-3xl">{option.emoji}</span>
-                    <span
-                      className={cn(
-                        "font-medium",
-                        formData.gender === option.value
-                          ? "text-primary"
-                          : "text-foreground"
-                      )}
-                    >
-                      {option.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-              {errors.gender && (
-                <p className="text-sm text-destructive mt-2 text-center">
-                  {errors.gender}
-                </p>
-              )}
-            </div>
+            <GenderStep
+              value={formData.gender}
+              onChange={(value) => setFormData({ ...formData, gender: value })}
+              error={errors.gender}
+            />
           </div>
 
           {/* Step 4: Bio */}
           <div
-            className="w-full px-6 flex flex-col items-center"
+            className="w-full px-6 flex flex-col items-center justify-start pt-4"
             style={{ scrollSnapAlign: "start", flex: `0 0 ${100 / steps.length}%` }}
           >
-            <div className="w-full max-w-md animate-fade-in">
-              <h2 className="text-2xl font-bold text-foreground text-center mb-2">
-                Tell us about yourself
-              </h2>
-              <p className="text-muted-foreground text-center mb-8">
-                A short bio to help others know you better
-              </p>
+            <BioStep
+              value={formData.bio}
+              onChange={(value) => setFormData({ ...formData, bio: value })}
+              error={errors.bio}
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="bio">Your bio</Label>
-                <Textarea
-                  id="bio"
-                  placeholder="I love coffee, music, and meeting new people..."
-                  value={formData.bio}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bio: e.target.value.slice(0, 200) })
-                  }
-                  className="min-h-[120px] rounded-xl bg-card border-border text-base resize-none"
-                />
-                {errors.bio && (
-                  <p className="text-sm text-destructive">{errors.bio}</p>
-                )}
-                <p className="text-xs text-muted-foreground text-right">
-                  {formData.bio.length}/200
-                </p>
-              </div>
-            </div>
+          {/* Step 5: Vibes */}
+          <div
+            className="w-full px-6 flex flex-col items-center justify-start pt-4"
+            style={{ scrollSnapAlign: "start", flex: `0 0 ${100 / steps.length}%` }}
+          >
+            <VibesStep
+              value={formData.vibes}
+              onChange={(value) => setFormData({ ...formData, vibes: value })}
+              error={errors.vibes}
+            />
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="sticky bottom-0 bg-background/80 backdrop-blur-lg border-t border-border p-4">
+      <div className="sticky bottom-0 bg-background/80 backdrop-blur-xl border-t border-border/50 p-4 safe-area-bottom">
         <div className="max-w-md mx-auto">
           <Button
             onClick={handleNext}
-            className="w-full h-14 rounded-xl text-base font-semibold"
+            disabled={isTransitioning}
+            className="w-full h-14 rounded-2xl text-base font-semibold gradient-primary hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
           >
-            {currentStep === steps.length - 1 ? (
-              <>
-                Get Started
-                <Check className="w-5 h-5 ml-2" />
-              </>
-            ) : (
-              <>
-                Continue
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </>
-            )}
+            {getButtonText()}
           </Button>
         </div>
       </div>
