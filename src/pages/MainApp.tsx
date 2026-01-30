@@ -12,6 +12,7 @@ export interface UserProfile {
   gender: string;
   bio: string;
   vibes: string[];
+  photo: string;
   email: string;
   createdAt: string;
 }

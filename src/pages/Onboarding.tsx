@@ -1,14 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, Check, User, Calendar, Users, FileText, Sparkles } from "lucide-react";
-import OnboardingHeader from "@/components/onboarding/OnboardingHeader";
-import StepIndicators from "@/components/onboarding/StepIndicators";
+import { ChevronRight, User, Calendar, Users, FileText, Sparkles, Camera, ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import NameStep from "@/components/onboarding/NameStep";
 import AgeStep from "@/components/onboarding/AgeStep";
 import GenderStep from "@/components/onboarding/GenderStep";
 import BioStep from "@/components/onboarding/BioStep";
 import VibesStep from "@/components/onboarding/VibesStep";
+import PhotoStep from "@/components/onboarding/PhotoStep";
 
 const steps = [
   { id: 1, title: "What's your name?", icon: User },
@@ -16,6 +16,7 @@ const steps = [
   { id: 3, title: "What's your gender?", icon: Users },
   { id: 4, title: "Tell us about yourself", icon: FileText },
   { id: 5, title: "What's your vibe?", icon: Sparkles },
+  { id: 6, title: "Add a photo", icon: Camera },
 ];
 
 const Onboarding = () => {
@@ -29,6 +30,7 @@ const Onboarding = () => {
     gender: "",
     bio: "",
     vibes: [] as string[],
+    photo: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -81,6 +83,9 @@ const Onboarding = () => {
           newErrors.vibes = "Please select at least 1 vibe";
         }
         break;
+      case 5:
+        // Photo is optional
+        break;
     }
 
     setErrors(newErrors);
@@ -110,6 +115,8 @@ const Onboarding = () => {
     }
   };
 
+  const progress = ((currentStep + 1) / steps.length) * 100;
+
   const getButtonText = () => {
     if (currentStep === steps.length - 1) {
       return (
@@ -128,21 +135,108 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 flex flex-col">
-      {/* Progress Header */}
-      <OnboardingHeader
-        currentStep={currentStep}
-        totalSteps={steps.length}
-        onBack={handleBack}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30 flex flex-col overflow-hidden">
+      {/* Ambient background effects */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            x: [0, 30, 0],
+            y: [0, -20, 0],
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-20 -left-20 w-60 h-60 bg-primary/10 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{
+            x: [0, -30, 0],
+            y: [0, 20, 0],
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-40 -right-20 w-80 h-80 bg-accent/10 rounded-full blur-3xl"
+        />
+      </div>
+
+      {/* Header */}
+      <div className="relative z-10 px-4 pt-4 pb-2">
+        <div className="max-w-md mx-auto">
+          {/* Back button and step indicator */}
+          <div className="flex items-center justify-between mb-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleBack}
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                currentStep > 0
+                  ? "bg-secondary text-foreground hover:bg-secondary/80"
+                  : "opacity-0 pointer-events-none"
+              }`}
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </motion.button>
+            <span className="text-sm font-medium text-muted-foreground">
+              Step {currentStep + 1} of {steps.length}
+            </span>
+            <div className="w-10" /> {/* Spacer */}
+          </div>
+
+          {/* Progress bar */}
+          <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent rounded-full"
+            />
+            {/* Shimmer effect */}
+            <motion.div
+              animate={{ x: ["-100%", "200%"] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+            />
+          </div>
+        </div>
+      </div>
 
       {/* Step Icons */}
-      <StepIndicators steps={steps} currentStep={currentStep} />
+      <div className="relative z-10 py-4 px-4">
+        <div className="max-w-md mx-auto flex justify-center gap-3">
+          {steps.map((step, index) => {
+            const Icon = step.icon;
+            const isActive = index === currentStep;
+            const isCompleted = index < currentStep;
+
+            return (
+              <motion.div
+                key={step.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className={`relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-500 ${
+                  isActive
+                    ? "bg-gradient-to-r from-primary to-accent text-white shadow-lg shadow-primary/30 scale-110"
+                    : isCompleted
+                    ? "bg-primary/20 text-primary"
+                    : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                {isActive && (
+                  <motion.div
+                    layoutId="activeRing"
+                    className="absolute inset-0 -m-1 rounded-full border-2 border-primary/50"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Scrollable Steps Container */}
       <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-x-hidden scroll-smooth"
+        className="flex-1 overflow-x-hidden scroll-smooth relative z-10"
         style={{ scrollSnapType: "x mandatory" }}
       >
         <div className="flex" style={{ width: `${steps.length * 100}%` }}>
@@ -205,21 +299,55 @@ const Onboarding = () => {
               error={errors.vibes}
             />
           </div>
+
+          {/* Step 6: Photo */}
+          <div
+            className="w-full px-6 flex flex-col items-center justify-start pt-4"
+            style={{ scrollSnapAlign: "start", flex: `0 0 ${100 / steps.length}%` }}
+          >
+            <PhotoStep
+              value={formData.photo}
+              onChange={(value) => setFormData({ ...formData, photo: value })}
+              error={errors.photo}
+            />
+          </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="sticky bottom-0 bg-background/80 backdrop-blur-xl border-t border-border/50 p-4 safe-area-bottom">
+      <motion.div 
+        initial={{ y: 100 }}
+        animate={{ y: 0 }}
+        transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+        className="sticky bottom-0 bg-background/80 backdrop-blur-xl border-t border-border/50 p-4 safe-area-bottom relative z-10"
+      >
         <div className="max-w-md mx-auto">
-          <Button
-            onClick={handleNext}
-            disabled={isTransitioning}
-            className="w-full h-14 rounded-2xl text-base font-semibold gradient-primary hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5"
-          >
-            {getButtonText()}
-          </Button>
+          <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }}>
+            <Button
+              onClick={handleNext}
+              disabled={isTransitioning}
+              className="w-full h-14 rounded-2xl text-base font-semibold gradient-primary hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30"
+            >
+              {getButtonText()}
+            </Button>
+          </motion.div>
+          
+          {/* Skip option for photo step */}
+          <AnimatePresence>
+            {currentStep === steps.length - 1 && !formData.photo && (
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                onClick={handleNext}
+                className="w-full mt-3 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Skip for now
+              </motion.button>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
