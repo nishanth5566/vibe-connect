@@ -7,14 +7,14 @@ import { MapPin, Users } from "lucide-react";
 
 // Mock data for nearby people with distances in km
 const allPeople = [
-  { id: 1, name: "Alex Chen", distanceKm: 0.3, vibe: "Cafés", x: 75, y: 70, color: "person-purple" },
-  { id: 2, name: "Sarah Kim", distanceKm: 2.5, vibe: "Music", x: 65, y: 55, color: "person-cyan" },
-  { id: 3, name: "Jordan Lee", distanceKm: 8, vibe: "Gaming", x: 85, y: 45, color: "person-pink" },
-  { id: 4, name: "Maya Patel", distanceKm: 15, vibe: "Fitness", x: 80, y: 65, color: "person-cyan" },
-  { id: 5, name: "Liam Brooks", distanceKm: 25, vibe: "Reading", x: 30, y: 40, color: "person-purple" },
-  { id: 6, name: "Emma Wilson", distanceKm: 45, vibe: "Photos", x: 20, y: 60, color: "person-pink" },
-  { id: 7, name: "Noah Garcia", distanceKm: 60, vibe: "Creative", x: 40, y: 75, color: "person-cyan" },
-  { id: 8, name: "Ava Martinez", distanceKm: 85, vibe: "Music", x: 55, y: 30, color: "person-purple" },
+  { id: 1, name: "Alex Chen", distanceKm: 0.3, vibe: "Cafés", x: 75, y: 70, color: "person-purple", isVerified: true },
+  { id: 2, name: "Sarah Kim", distanceKm: 2.5, vibe: "Music", x: 65, y: 55, color: "person-cyan", isVerified: true },
+  { id: 3, name: "Jordan Lee", distanceKm: 8, vibe: "Gaming", x: 85, y: 45, color: "person-pink", isVerified: false },
+  { id: 4, name: "Maya Patel", distanceKm: 15, vibe: "Fitness", x: 80, y: 65, color: "person-cyan", isVerified: true },
+  { id: 5, name: "Liam Brooks", distanceKm: 25, vibe: "Reading", x: 30, y: 40, color: "person-purple", isVerified: false },
+  { id: 6, name: "Emma Wilson", distanceKm: 45, vibe: "Photos", x: 20, y: 60, color: "person-pink", isVerified: true },
+  { id: 7, name: "Noah Garcia", distanceKm: 60, vibe: "Creative", x: 40, y: 75, color: "person-cyan", isVerified: true },
+  { id: 8, name: "Ava Martinez", distanceKm: 85, vibe: "Music", x: 55, y: 30, color: "person-purple", isVerified: false },
 ];
 
 interface MapViewProps {
@@ -232,6 +232,7 @@ const MapView = ({ onOpenChat }: MapViewProps) => {
                 distance={formatDistance(currentPerson.distanceKm)}
                 vibe={currentPerson.vibe}
                 avatarColor="bg-gradient-to-br from-primary to-accent"
+                isVerified={currentPerson.isVerified}
                 onChat={handleChat}
                 onNext={handleNext}
               />
