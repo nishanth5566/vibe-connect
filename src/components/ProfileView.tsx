@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Settings, Edit3, LogOut, MapPin, Briefcase, Heart, Calendar, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -5,6 +6,8 @@ import type { UserProfile } from "@/pages/MainApp";
 import { vibeOptions } from "@/data/vibes";
 import { motion } from "framer-motion";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import SettingsSheet from "@/components/SettingsSheet";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface ProfileViewProps {
   userProfile: UserProfile;
@@ -12,6 +15,8 @@ interface ProfileViewProps {
 }
 
 const ProfileView = ({ userProfile, onLogout }: ProfileViewProps) => {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  
   // Get vibes from user profile
   const userVibes = userProfile.vibes || [];
   const vibeLabels = userVibes.map(id => vibeOptions.find(v => v.id === id)).filter(Boolean);
@@ -48,10 +53,13 @@ const ProfileView = ({ userProfile, onLogout }: ProfileViewProps) => {
         <motion.button 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => setSettingsOpen(true)}
           className="absolute top-4 right-4 w-10 h-10 rounded-full bg-primary-foreground/20 backdrop-blur-sm flex items-center justify-center text-primary-foreground hover:bg-primary-foreground/30 transition-colors"
         >
           <Settings className="w-5 h-5" />
         </motion.button>
+        
+        <SettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} />
 
         {/* Avatar */}
         <motion.div 
@@ -73,8 +81,10 @@ const ProfileView = ({ userProfile, onLogout }: ProfileViewProps) => {
               </AvatarFallback>
             </Avatar>
             
-            {/* Online indicator */}
-            <div className="absolute bottom-1 right-1 w-5 h-5 bg-online rounded-full ring-3 ring-background" />
+            {/* Verified indicator */}
+            <div className="absolute bottom-1 right-1">
+              <VerifiedBadge size="md" />
+            </div>
           </div>
         </motion.div>
       </div>

@@ -1,7 +1,9 @@
 import { useState, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
-import { Camera, Upload, Sparkles, X, Check } from "lucide-react";
+import { Camera, Upload, Sparkles, X, Check, ShieldCheck, AlertCircle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { verifyPhoto, VerificationResult } from "@/services/photoVerification";
+import VerifiedBadge from "@/components/VerifiedBadge";
 
 interface PhotoStepProps {
   value: string;
@@ -12,20 +14,36 @@ interface PhotoStepProps {
 const PhotoStep = ({ value, onChange, error }: PhotoStepProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verification, setVerification] = useState<VerificationResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = useCallback((file: File) => {
+  const handleFile = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) {
       return;
     }
     
     setIsUploading(true);
+    setVerification(null);
+    
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setTimeout(() => {
-        onChange(reader.result as string);
-        setIsUploading(false);
-      }, 800); // Simulated upload delay for UX
+    reader.onloadend = async () => {
+      const base64 = reader.result as string;
+      setIsUploading(false);
+      setIsVerifying(true);
+      
+      // Run photo verification
+      const result = await verifyPhoto(base64);
+      setVerification(result);
+      setIsVerifying(false);
+      
+      // Only set the value if verification passed
+      if (result.isValid) {
+        onChange(base64);
+      } else {
+        // Still show the preview but with warning
+        onChange(base64);
+      }
     };
     reader.readAsDataURL(file);
   }, [onChange]);
@@ -150,16 +168,56 @@ const PhotoStep = ({ value, onChange, error }: PhotoStepProps) => {
                 <X className="w-4 h-4" />
               </motion.button>
               
-              {/* Success badge */}
-              <motion.div
-                initial={{ scale: 0, y: 10 }}
-                animate={{ scale: 1, y: 0 }}
-                transition={{ delay: 0.3, type: "spring" }}
-                className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-success text-white text-xs font-medium flex items-center gap-1 shadow-lg"
-              >
-                <Check className="w-3 h-3" />
-                Looking great!
-              </motion.div>
+              {/* Verification badge */}
+              <AnimatePresence mode="wait">
+                {isVerifying ? (
+                  <motion.div
+                    key="verifying"
+                    initial={{ scale: 0, y: 10 }}
+                    animate={{ scale: 1, y: 0 }}
+                    exit={{ scale: 0, y: 10 }}
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs font-medium flex items-center gap-2 shadow-lg"
+                  >
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Verifying...
+                  </motion.div>
+                ) : verification?.isValid ? (
+                  <motion.div
+                    key="verified"
+                    initial={{ scale: 0, y: 10 }}
+                    animate={{ scale: 1, y: 0 }}
+                    exit={{ scale: 0, y: 10 }}
+                    transition={{ delay: 0.1, type: "spring" }}
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-gradient-to-r from-success to-accent text-white text-xs font-medium flex items-center gap-1.5 shadow-lg"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Verified
+                  </motion.div>
+                ) : verification && !verification.isValid ? (
+                  <motion.div
+                    key="warning"
+                    initial={{ scale: 0, y: 10 }}
+                    animate={{ scale: 1, y: 0 }}
+                    exit={{ scale: 0, y: 10 }}
+                    transition={{ delay: 0.1, type: "spring" }}
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full bg-destructive/90 text-white text-xs font-medium flex items-center gap-1.5 shadow-lg"
+                  >
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    Try again
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="success"
+                    initial={{ scale: 0, y: 10 }}
+                    animate={{ scale: 1, y: 0 }}
+                    transition={{ delay: 0.3, type: "spring" }}
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-success text-white text-xs font-medium flex items-center gap-1 shadow-lg"
+                  >
+                    <Check className="w-3 h-3" />
+                    Looking great!
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
           ) : (
             <motion.div
@@ -233,12 +291,58 @@ const PhotoStep = ({ value, onChange, error }: PhotoStepProps) => {
           )}
         </AnimatePresence>
 
+        {/* Verification Feedback */}
+        <AnimatePresence>
+          {verification && !verification.isValid && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mt-6 p-4 rounded-xl bg-destructive/10 border border-destructive/20"
+            >
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-medium text-destructive text-sm">{verification.feedback}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Score: {verification.confidenceScore}% - Try a clearer photo
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Verification Success */}
+        <AnimatePresence>
+          {verification?.isValid && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="mt-6 p-4 rounded-xl bg-success/10 border border-success/20"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-success" />
+                </div>
+                <div>
+                  <p className="font-medium text-success text-sm">Photo Verified!</p>
+                  <p className="text-xs text-muted-foreground">
+                    Confidence: {verification.confidenceScore}%
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Tips */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="mt-8 space-y-2"
+          className="mt-6 space-y-2"
         >
           {[
             { icon: "✨", text: "Clear face photo works best" },
