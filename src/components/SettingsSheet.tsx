@@ -14,11 +14,14 @@ import {
   FileText,
   ChevronRight,
   Smartphone,
-  ExternalLink
+  ExternalLink,
+  CheckCircle2,
+  XCircle
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/hooks/useTheme";
+import { usePermissions } from "@/hooks/usePermissions";
 import BlockedUsersSheet from "@/components/settings/BlockedUsersSheet";
 import HelpCenterSheet from "@/components/settings/HelpCenterSheet";
 import DeleteAccountDialog from "@/components/settings/DeleteAccountDialog";
@@ -37,9 +40,10 @@ interface SettingItemProps {
   onClick?: () => void;
   danger?: boolean;
   external?: boolean;
+  status?: "granted" | "denied" | "prompt" | "unsupported";
 }
 
-const SettingItem = ({ icon, label, description, children, onClick, danger, external }: SettingItemProps) => (
+const SettingItem = ({ icon, label, description, children, onClick, danger, external, status }: SettingItemProps) => (
   <motion.div
     whileTap={{ scale: 0.98 }}
     className={cn(
@@ -56,7 +60,15 @@ const SettingItem = ({ icon, label, description, children, onClick, danger, exte
       {icon}
     </div>
     <div className="flex-1">
-      <p className={cn("font-medium", danger ? "text-destructive" : "text-foreground")}>{label}</p>
+      <div className="flex items-center gap-2">
+        <p className={cn("font-medium", danger ? "text-destructive" : "text-foreground")}>{label}</p>
+        {status === "granted" && (
+          <CheckCircle2 className="w-4 h-4 text-success" />
+        )}
+        {status === "denied" && (
+          <XCircle className="w-4 h-4 text-destructive" />
+        )}
+      </div>
       {description && <p className="text-xs text-muted-foreground">{description}</p>}
     </div>
     {children}
@@ -72,6 +84,8 @@ const SettingItem = ({ icon, label, description, children, onClick, danger, exte
 
 const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => {
   const { theme, toggleTheme } = useTheme();
+  const { permissions, requestNotificationPermission, requestLocationPermission } = usePermissions();
+  
   const [notifications, setNotifications] = useState(true);
   const [messageAlerts, setMessageAlerts] = useState(true);
   const [locationSharing, setLocationSharing] = useState(true);
@@ -98,6 +112,7 @@ const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => 
     }
   }, []);
 
+
   // Save settings to localStorage
   useEffect(() => {
     localStorage.setItem("radius_settings", JSON.stringify({
@@ -109,6 +124,26 @@ const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => 
       discoveryRadius: discoveryRadius[0],
     }));
   }, [notifications, messageAlerts, locationSharing, showOnline, privacyConsent, discoveryRadius]);
+
+  // Handle notification toggle with permission request
+  const handleNotificationToggle = async (enabled: boolean) => {
+    if (enabled) {
+      const granted = await requestNotificationPermission();
+      setNotifications(granted);
+    } else {
+      setNotifications(false);
+    }
+  };
+
+  // Handle location toggle with permission request
+  const handleLocationToggle = async (enabled: boolean) => {
+    if (enabled) {
+      const granted = await requestLocationPermission();
+      setLocationSharing(granted);
+    } else {
+      setLocationSharing(false);
+    }
+  };
 
   const handleOpenTerms = () => {
     window.open("https://radius.app/terms", "_blank");
@@ -124,6 +159,7 @@ const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => 
     localStorage.removeItem("radius_email");
     localStorage.removeItem("radius_settings");
     localStorage.removeItem("radius_theme");
+    localStorage.removeItem("radius_location");
     setDeleteDialogOpen(false);
     onOpenChange(false);
     if (onLogout) {
@@ -136,6 +172,16 @@ const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => 
       return `${Math.round(value * 1000)}m`;
     }
     return `${value.toFixed(1)}km`;
+  };
+
+  const getPermissionDescription = (type: "notifications" | "location") => {
+    const status = permissions[type];
+    if (status === "granted") return "Permission granted ✓";
+    if (status === "denied") return "Permission blocked - enable in browser settings";
+    if (status === "unsupported") return "Not supported in this browser";
+    return type === "notifications" 
+      ? "Get notified about new matches" 
+      : "Show your location on the map";
   };
 
   return (
@@ -171,11 +217,13 @@ const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => 
                 <SettingItem
                   icon={<Bell className="w-5 h-5 text-primary" />}
                   label="Push Notifications"
-                  description="Get notified about new matches"
+                  description={getPermissionDescription("notifications")}
+                  status={permissions.notifications}
                 >
                   <Switch 
-                    checked={notifications} 
-                    onCheckedChange={setNotifications}
+                    checked={notifications && permissions.notifications === "granted"} 
+                    onCheckedChange={handleNotificationToggle}
+                    disabled={permissions.notifications === "unsupported"}
                   />
                 </SettingItem>
                 <div className="h-px bg-border mx-3" />
@@ -198,11 +246,13 @@ const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => 
                 <SettingItem
                   icon={<MapPin className="w-5 h-5 text-primary" />}
                   label="Share Location"
-                  description="Show your location on the map"
+                  description={getPermissionDescription("location")}
+                  status={permissions.location}
                 >
                   <Switch 
-                    checked={locationSharing} 
-                    onCheckedChange={setLocationSharing}
+                    checked={locationSharing && permissions.location === "granted"} 
+                    onCheckedChange={handleLocationToggle}
+                    disabled={permissions.location === "unsupported"}
                   />
                 </SettingItem>
                 <div className="h-px bg-border mx-3" />
