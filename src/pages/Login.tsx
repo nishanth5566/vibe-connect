@@ -193,8 +193,21 @@ const Login = () => {
         {/* Terms */}
         <p className="text-center text-xs text-muted-foreground mt-6 px-4">
           By continuing, you agree to our{" "}
-          <span className="text-primary">Terms of Service</span> and{" "}
-          <span className="text-primary">Privacy Policy</span>
+          <button 
+            type="button"
+            onClick={() => window.open("https://radius.app/terms", "_blank")}
+            className="text-primary hover:underline"
+          >
+            Terms of Service
+          </button>{" "}
+          and{" "}
+          <button 
+            type="button"
+            onClick={() => window.open("https://radius.app/privacy", "_blank")}
+            className="text-primary hover:underline"
+          >
+            Privacy Policy
+          </button>
         </p>
       </div>
     </div>
