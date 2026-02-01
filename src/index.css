@@ -8,88 +8,139 @@
 
 @layer base {
   :root {
-    --background: 240 20% 98%;
-    --foreground: 240 10% 10%;
+    /* Dark Rich Theme - Charcoal/Orange/Amber */
+    --background: 240 21% 15%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 10%;
+    --card: 240 17% 20%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 10%;
+    --popover: 240 17% 20%;
+    --popover-foreground: 210 40% 98%;
 
-    /* Primary - Vibrant Purple */
-    --primary: 271 91% 65%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary - Rich Orange #FF6B35 */
+    --primary: 17 100% 60%;
+    --primary-foreground: 210 40% 98%;
 
-    /* Secondary - Soft lavender */
-    --secondary: 260 60% 96%;
-    --secondary-foreground: 271 91% 45%;
+    /* Secondary - Darker slate */
+    --secondary: 240 17% 25%;
+    --secondary-foreground: 17 100% 70%;
 
     /* Muted surfaces */
-    --muted: 240 10% 96%;
-    --muted-foreground: 240 5% 50%;
+    --muted: 240 17% 25%;
+    --muted-foreground: 215 20% 65%;
 
-    /* Accent - Cyan/Teal */
-    --accent: 190 90% 60%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent - Amber #F59E0B */
+    --accent: 43 96% 50%;
+    --accent-foreground: 240 21% 15%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 240 10% 90%;
-    --input: 240 10% 90%;
-    --ring: 271 91% 65%;
+    --border: 240 13% 28%;
+    --input: 240 13% 28%;
+    --ring: 17 100% 60%;
 
     --radius: 1rem;
 
     /* Custom colors for the app */
-    --map-bg: 220 25% 97%;
-    --person-purple: 271 91% 65%;
-    --person-cyan: 190 90% 60%;
+    --map-bg: 240 17% 18%;
+    --person-purple: 17 100% 60%;
+    --person-cyan: 43 96% 50%;
     --person-pink: 330 85% 65%;
-    --vibe-tag: 271 91% 95%;
-    --vibe-tag-text: 271 91% 45%;
-    --nav-inactive: 240 5% 60%;
+    --vibe-tag: 17 100% 20%;
+    --vibe-tag-text: 17 100% 70%;
+    --nav-inactive: 215 20% 50%;
     --success: 145 65% 45%;
     --online: 145 70% 50%;
   }
 
   .dark {
-    --background: 240 15% 8%;
-    --foreground: 0 0% 95%;
+    /* Dark Rich Theme - Charcoal/Orange/Amber (same as root for dark-first) */
+    --background: 240 21% 15%;
+    --foreground: 210 40% 98%;
 
-    --card: 240 15% 12%;
-    --card-foreground: 0 0% 95%;
+    --card: 240 17% 20%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 240 15% 12%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 240 17% 20%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 271 91% 65%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary - Rich Orange #FF6B35 */
+    --primary: 17 100% 60%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 260 30% 20%;
-    --secondary-foreground: 271 91% 75%;
+    /* Secondary - Darker slate */
+    --secondary: 240 17% 25%;
+    --secondary-foreground: 17 100% 70%;
 
-    --muted: 240 10% 18%;
-    --muted-foreground: 240 5% 60%;
+    /* Muted surfaces */
+    --muted: 240 17% 25%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 190 90% 60%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent - Amber #F59E0B */
+    --accent: 43 96% 50%;
+    --accent-foreground: 240 21% 15%;
 
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 240 10% 20%;
-    --input: 240 10% 20%;
-    --ring: 271 91% 65%;
+    --border: 240 13% 28%;
+    --input: 240 13% 28%;
+    --ring: 17 100% 60%;
 
-    --map-bg: 240 15% 12%;
-    --person-purple: 271 91% 65%;
-    --person-cyan: 190 90% 60%;
+    --map-bg: 240 17% 18%;
+    --person-purple: 17 100% 60%;
+    --person-cyan: 43 96% 50%;
     --person-pink: 330 85% 65%;
-    --vibe-tag: 271 50% 25%;
-    --vibe-tag-text: 271 91% 75%;
-    --nav-inactive: 240 5% 50%;
+    --vibe-tag: 17 100% 20%;
+    --vibe-tag-text: 17 100% 70%;
+    --nav-inactive: 215 20% 50%;
+    --success: 145 65% 45%;
+    --online: 145 70% 50%;
+  }
+
+  /* Light mode override */
+  .light {
+    --background: 210 40% 98%;
+    --foreground: 240 21% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 21% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 21% 15%;
+
+    /* Primary - Rich Orange #FF6B35 */
+    --primary: 17 100% 55%;
+    --primary-foreground: 210 40% 98%;
+
+    /* Secondary - Light surface */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 17 100% 45%;
+
+    /* Muted surfaces */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent - Amber #F59E0B */
+    --accent: 43 96% 50%;
+    --accent-foreground: 240 21% 15%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 17 100% 55%;
+
+    --map-bg: 210 40% 96%;
+    --person-purple: 17 100% 55%;
+    --person-cyan: 43 96% 50%;
+    --person-pink: 330 85% 65%;
+    --vibe-tag: 17 100% 95%;
+    --vibe-tag-text: 17 100% 45%;
+    --nav-inactive: 215 16% 47%;
     --success: 145 65% 45%;
     --online: 145 70% 50%;
   }

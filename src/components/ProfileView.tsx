@@ -59,7 +59,7 @@ const ProfileView = ({ userProfile, onLogout }: ProfileViewProps) => {
           <Settings className="w-5 h-5" />
         </motion.button>
         
-        <SettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} />
+        <SettingsSheet open={settingsOpen} onOpenChange={setSettingsOpen} onLogout={onLogout} />
 
         {/* Avatar */}
         <motion.div 
