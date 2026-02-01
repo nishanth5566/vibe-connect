@@ -60,6 +60,7 @@ export default {
         "nav-inactive": "hsl(var(--nav-inactive))",
         success: "hsl(var(--success))",
         online: "hsl(var(--online))",
+        warning: "hsl(var(--accent))",
       },
       borderRadius: {
         lg: "var(--radius)",
