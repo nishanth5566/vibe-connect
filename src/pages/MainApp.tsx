@@ -5,6 +5,7 @@ import MapView from "@/components/MapView";
 import ExploreView from "@/components/ExploreView";
 import ChatsView from "@/components/ChatsView";
 import ProfileView from "@/components/ProfileView";
+import { GroupMember } from "@/hooks/useGroupStore";
 
 export interface UserProfile {
   name: string;
@@ -22,6 +23,7 @@ const MainApp = () => {
   const [activeTab, setActiveTab] = useState<"map" | "explore" | "chats" | "profile">("map");
   const [openChatId, setOpenChatId] = useState<number | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [highlightedUser, setHighlightedUser] = useState<GroupMember | null>(null);
 
   useEffect(() => {
     // Check if user has completed onboarding
@@ -43,12 +45,20 @@ const MainApp = () => {
     if (tab !== "chats") {
       setOpenChatId(null);
     }
+    if (tab !== "map") {
+      setHighlightedUser(null);
+    }
   };
 
   const handleLogout = () => {
     localStorage.removeItem("radius_profile");
     localStorage.removeItem("radius_email");
     navigate("/");
+  };
+
+  const handleShowUserOnMap = (user: GroupMember) => {
+    setHighlightedUser(user);
+    setActiveTab("map");
   };
 
   if (!userProfile) {
@@ -63,8 +73,12 @@ const MainApp = () => {
     <div className="h-screen w-full max-w-md mx-auto bg-background overflow-hidden relative">
       {/* Main Content */}
       <main className="h-full">
-        {activeTab === "map" && <MapView onOpenChat={handleOpenChat} />}
-        {activeTab === "explore" && <ExploreView />}
+        {activeTab === "map" && (
+          <MapView onOpenChat={handleOpenChat} highlightedUser={highlightedUser} />
+        )}
+        {activeTab === "explore" && (
+          <ExploreView onShowUserOnMap={handleShowUserOnMap} />
+        )}
         {activeTab === "chats" && <ChatsView openChatId={openChatId} />}
         {activeTab === "profile" && (
           <ProfileView userProfile={userProfile} onLogout={handleLogout} />
