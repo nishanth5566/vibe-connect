@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PersonCard from "./PersonCard";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
-import { MapPin, Users } from "lucide-react";
+import { MapPin, Users, X } from "lucide-react";
+import { GroupMember } from "@/hooks/useGroupStore";
+import { Button } from "@/components/ui/button";
 
 // Mock data for nearby people with distances in km
 const allPeople = [
@@ -19,11 +21,20 @@ const allPeople = [
 
 interface MapViewProps {
   onOpenChat: (personId: number) => void;
+  highlightedUser?: GroupMember | null;
 }
 
-const MapView = ({ onOpenChat }: MapViewProps) => {
+const MapView = ({ onOpenChat, highlightedUser }: MapViewProps) => {
   const [radius, setRadius] = useState(10);
   const [currentPersonIndex, setCurrentPersonIndex] = useState(0);
+  const [showHighlightedUser, setShowHighlightedUser] = useState(false);
+
+  // Show highlighted user when it changes
+  useEffect(() => {
+    if (highlightedUser) {
+      setShowHighlightedUser(true);
+    }
+  }, [highlightedUser]);
 
   // Filter people within the selected radius
   const nearbyPeople = allPeople.filter((person) => person.distanceKm <= radius);
@@ -50,6 +61,10 @@ const MapView = ({ onOpenChat }: MapViewProps) => {
   const formatDistance = (km: number) => {
     if (km < 1) return `${Math.round(km * 1000)}m away`;
     return `${km.toFixed(1)}km away`;
+  };
+
+  const dismissHighlightedUser = () => {
+    setShowHighlightedUser(false);
   };
 
   return (
@@ -213,6 +228,72 @@ const MapView = ({ onOpenChat }: MapViewProps) => {
               )}
             </motion.button>
           ))}
+
+          {/* Highlighted User from Group */}
+          {showHighlightedUser && highlightedUser && highlightedUser.x && highlightedUser.y && (
+            <motion.div
+              key={`highlighted-${highlightedUser.id}`}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1.3, opacity: 1 }}
+              className={cn(
+                "absolute w-12 h-12 rounded-full flex items-center justify-center ring-4 ring-primary shadow-glow z-20 bg-gradient-to-br",
+                highlightedUser.avatarColor
+              )}
+              style={{
+                left: `${highlightedUser.x}%`,
+                top: `${highlightedUser.y}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+            >
+              <span className="text-sm font-bold text-primary-foreground">
+                {highlightedUser.name.charAt(0)}
+              </span>
+              <motion.div
+                className="absolute inset-0 rounded-full bg-primary/40"
+                animate={{ scale: [1, 2, 1], opacity: [0.6, 0, 0.6] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Highlighted User Info Card */}
+        <AnimatePresence>
+          {showHighlightedUser && highlightedUser && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="absolute top-48 left-4 right-4 glass-card rounded-2xl p-4 z-30"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center text-primary-foreground font-semibold bg-gradient-to-br",
+                      highlightedUser.avatarColor
+                    )}
+                  >
+                    {highlightedUser.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">{highlightedUser.name}</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {highlightedUser.isOnline ? "Online now" : "Offline"}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={dismissHighlightedUser}
+                  className="h-8 w-8"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 
