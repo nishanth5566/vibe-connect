@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useSyncExternalStore } from "react";
 
 export interface GroupMember {
   id: number;
@@ -172,50 +172,63 @@ const getInitialState = (): GroupStoreState => {
   };
 };
 
+// Global store singleton
+let globalState: GroupStoreState = getInitialState();
+const listeners = new Set<() => void>();
+
+const subscribe = (listener: () => void) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+};
+
+const getSnapshot = () => globalState;
+
+const setState = (updater: (prev: GroupStoreState) => GroupStoreState) => {
+  globalState = updater(globalState);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(globalState));
+  listeners.forEach((listener) => listener());
+};
+
 export const useGroupStore = () => {
-  const [state, setState] = useState<GroupStoreState>(getInitialState);
+  const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
-
-  const joinGroup = (groupId: number) => {
+  const joinGroup = useCallback((groupId: number) => {
     setState((prev) => ({
       ...prev,
       groups: prev.groups.map((g) =>
         g.id === groupId ? { ...g, isJoined: true } : g
       ),
     }));
-  };
+  }, []);
 
-  const leaveGroup = (groupId: number) => {
+  const leaveGroup = useCallback((groupId: number) => {
     setState((prev) => ({
       ...prev,
       groups: prev.groups.map((g) =>
         g.id === groupId ? { ...g, isJoined: false } : g
       ),
     }));
-  };
+  }, []);
 
-  const muteGroup = (groupId: number, muted: boolean) => {
+  const muteGroup = useCallback((groupId: number, muted: boolean) => {
     setState((prev) => ({
       ...prev,
       groups: prev.groups.map((g) =>
         g.id === groupId ? { ...g, isMuted: muted } : g
       ),
     }));
-  };
+  }, []);
 
-  const clearGroupChat = (groupId: number) => {
+  const clearGroupChat = useCallback((groupId: number) => {
     setState((prev) => ({
       ...prev,
       groups: prev.groups.map((g) =>
         g.id === groupId ? { ...g, messages: [] } : g
       ),
     }));
-  };
+  }, []);
 
-  const sendMessage = (groupId: number, message: Omit<GroupMessage, "id">) => {
+  const sendMessage = useCallback((groupId: number, message: Omit<GroupMessage, "id">) => {
     setState((prev) => ({
       ...prev,
       groups: prev.groups.map((g) =>
@@ -224,9 +237,9 @@ export const useGroupStore = () => {
           : g
       ),
     }));
-  };
+  }, []);
 
-  const blockUser = (user: { id: number; name: string }) => {
+  const blockUser = useCallback((user: { id: number; name: string }) => {
     setState((prev) => ({
       ...prev,
       blockedUsers: [
@@ -234,16 +247,16 @@ export const useGroupStore = () => {
         { ...user, blockedAt: new Date().toISOString() },
       ],
     }));
-  };
+  }, []);
 
-  const unblockUser = (userId: number) => {
+  const unblockUser = useCallback((userId: number) => {
     setState((prev) => ({
       ...prev,
       blockedUsers: prev.blockedUsers.filter((u) => u.id !== userId),
     }));
-  };
+  }, []);
 
-  const reportUser = (userId: number, reason: string) => {
+  const reportUser = useCallback((userId: number, reason: string) => {
     setState((prev) => ({
       ...prev,
       reportedUsers: [
@@ -251,15 +264,15 @@ export const useGroupStore = () => {
         { id: userId, reason, reportedAt: new Date().toISOString() },
       ],
     }));
-  };
+  }, []);
 
-  const isUserBlocked = (userId: number) => {
+  const isUserBlocked = useCallback((userId: number) => {
     return state.blockedUsers.some((u) => u.id === userId);
-  };
+  }, [state.blockedUsers]);
 
-  const getGroup = (groupId: number) => {
+  const getGroup = useCallback((groupId: number) => {
     return state.groups.find((g) => g.id === groupId);
-  };
+  }, [state.groups]);
 
   return {
     groups: state.groups,
