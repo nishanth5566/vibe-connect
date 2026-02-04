@@ -61,73 +61,71 @@ const ExploreView = ({ onShowUserOnMap }: ExploreViewProps) => {
 
       {/* Groups Grid */}
       <div className="p-4 space-y-4">
-        {groups.map((group, index) => {
-          return (
-            <button
-              key={group.id}
-              onClick={() => handleOpenGroup(group.id)}
-              className={cn(
-                "w-full bg-card rounded-2xl p-4 shadow-card hover:shadow-lg transition-all duration-300 animate-fade-in text-left",
-                group.isJoined && "cursor-pointer",
-                !group.isJoined && "cursor-default"
-              )}
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              <div className="flex items-center gap-4">
-                {/* Icon */}
-                <div className={cn(
-                  "w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br relative",
-                  group.gradient
-                )}>
-                  <Users className="w-7 h-7 text-primary-foreground" />
-                  {group.isMuted && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-muted rounded-full flex items-center justify-center">
-                      <BellOff className="w-3 h-3 text-muted-foreground" />
-                    </div>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-foreground text-lg truncate">{group.name}</h3>
-                  <p className="text-muted-foreground text-sm truncate">{group.description}</p>
-                </div>
-
-                {/* Join/Open Button */}
-                {group.isJoined ? (
-                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Users className="w-4 h-4" />
-                    <span className="text-sm font-medium">{group.members.length}</span>
+        {groups.map((group, index) => (
+          <button
+            key={group.id}
+            onClick={() => group.isJoined && handleOpenGroup(group.id)}
+            className={cn(
+              "w-full bg-card rounded-2xl p-4 shadow-card hover:shadow-lg transition-all duration-300 animate-fade-in text-left",
+              group.isJoined && "cursor-pointer",
+              !group.isJoined && "cursor-default"
+            )}
+            style={{ animationDelay: `${index * 50}ms` }}
+          >
+            <div className="flex items-center gap-4">
+              {/* Icon */}
+              <div className={cn(
+                "w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br relative",
+                group.gradient
+              )}>
+                <Users className="w-7 h-7 text-primary-foreground" />
+                {group.isMuted && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-muted rounded-full flex items-center justify-center">
+                    <BellOff className="w-3 h-3 text-muted-foreground" />
                   </div>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={(e) => handleJoinGroup(group.id, e)}
-                    className="gap-1.5"
-                  >
-                    <LogIn className="w-4 h-4" />
-                    Join
-                  </Button>
                 )}
               </div>
 
-              {/* Vibe Tag */}
-              <div className="mt-3 flex items-center gap-2">
-                <span className="px-3 py-1 text-xs font-medium rounded-full bg-vibe-tag text-vibe-tag-text">
-                  {group.vibe}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {group.members.length} people nearby
-                </span>
-                {group.isJoined && (
-                  <span className="ml-auto text-xs text-primary font-medium">
-                    Joined ✓
-                  </span>
-                )}
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-foreground text-lg truncate">{group.name}</h3>
+                <p className="text-muted-foreground text-sm truncate">{group.description}</p>
               </div>
-            </button>
-          );
-        })}
+
+              {/* Join/Open Button */}
+              {group.isJoined ? (
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Users className="w-4 h-4" />
+                  <span className="text-sm font-medium">{group.members.length}</span>
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={(e) => handleJoinGroup(group.id, e)}
+                  className="gap-1.5"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Join
+                </Button>
+              )}
+            </div>
+
+            {/* Vibe Tag */}
+            <div className="mt-3 flex items-center gap-2">
+              <span className="px-3 py-1 text-xs font-medium rounded-full bg-vibe-tag text-vibe-tag-text">
+                {group.vibe}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {group.members.length} people nearby
+              </span>
+              {group.isJoined && (
+                <span className="ml-auto text-xs text-primary font-medium">
+                  Joined ✓
+                </span>
+              )}
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   );
