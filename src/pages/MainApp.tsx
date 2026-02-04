@@ -56,8 +56,8 @@ const MainApp = () => {
     navigate("/");
   };
 
-  const handleShowUserOnMap = (user: GroupMember) => {
-    setHighlightedUser(user);
+  const handleShowUserOnMap = (user: { id: number; name: string; x?: number; y?: number }) => {
+    setHighlightedUser(user as GroupMember);
     setActiveTab("map");
   };
 
@@ -79,7 +79,9 @@ const MainApp = () => {
         {activeTab === "explore" && (
           <ExploreView onShowUserOnMap={handleShowUserOnMap} />
         )}
-        {activeTab === "chats" && <ChatsView openChatId={openChatId} />}
+        {activeTab === "chats" && (
+          <ChatsView openChatId={openChatId} onShowUserOnMap={handleShowUserOnMap} />
+        )}
         {activeTab === "profile" && (
           <ProfileView userProfile={userProfile} onLogout={handleLogout} />
         )}
