@@ -37,7 +37,8 @@ const ReportUserDialog = ({
   const [selectedReason, setSelectedReason] = useState("");
   const [otherReason, setOtherReason] = useState("");
 
-  const handleReport = () => {
+  const handleReport = (e: React.MouseEvent) => {
+    e.preventDefault();
     const reason = selectedReason === "other" ? otherReason : selectedReason;
     if (reason) {
       onReport(reason);
