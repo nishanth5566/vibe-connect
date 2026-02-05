@@ -1,9 +1,11 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, MapPin } from "lucide-react";
+ import { useState } from "react";
+ import { useNavigate } from "react-router-dom";
+ import { Button } from "@/components/ui/button";
+ import { Input } from "@/components/ui/input";
+ import { Label } from "@/components/ui/label";
+ import { Eye, EyeOff, MapPin } from "lucide-react";
+ import TermsOfServiceSheet from "@/components/settings/TermsOfServiceSheet";
+ import PrivacyPolicySheet from "@/components/settings/PrivacyPolicySheet";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,6 +17,9 @@ const Login = () => {
     confirmPassword: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+ 
+   const [termsOpen, setTermsOpen] = useState(false);
+   const [privacyOpen, setPrivacyOpen] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -193,23 +198,18 @@ const Login = () => {
         {/* Terms */}
         <p className="text-center text-xs text-muted-foreground mt-6 px-4">
           By continuing, you agree to our{" "}
-          <button 
-            type="button"
-            onClick={() => window.open("https://radius.app/terms", "_blank")}
-            className="text-primary hover:underline"
-          >
+           <button type="button" onClick={() => setTermsOpen(true)} className="text-primary hover:underline">
             Terms of Service
           </button>{" "}
           and{" "}
-          <button 
-            type="button"
-            onClick={() => window.open("https://radius.app/privacy", "_blank")}
-            className="text-primary hover:underline"
-          >
+           <button type="button" onClick={() => setPrivacyOpen(true)} className="text-primary hover:underline">
             Privacy Policy
           </button>
         </p>
       </div>
+ 
+       <TermsOfServiceSheet open={termsOpen} onOpenChange={setTermsOpen} />
+       <PrivacyPolicySheet open={privacyOpen} onOpenChange={setPrivacyOpen} />
     </div>
   );
 };
