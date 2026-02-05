@@ -56,6 +56,13 @@ const MainApp = () => {
     navigate("/");
   };
 
+   const handleUpdateProfile = (updates: Partial<UserProfile>) => {
+     if (!userProfile) return;
+     const updated = { ...userProfile, ...updates };
+     setUserProfile(updated);
+     localStorage.setItem("radius_profile", JSON.stringify(updated));
+   };
+ 
   const handleShowUserOnMap = (user: { id: number; name: string; x?: number; y?: number }) => {
     setHighlightedUser(user as GroupMember);
     setActiveTab("map");
@@ -83,7 +90,11 @@ const MainApp = () => {
           <ChatsView openChatId={openChatId} onShowUserOnMap={handleShowUserOnMap} />
         )}
         {activeTab === "profile" && (
-          <ProfileView userProfile={userProfile} onLogout={handleLogout} />
+           <ProfileView 
+             userProfile={userProfile} 
+             onLogout={handleLogout} 
+             onUpdateProfile={handleUpdateProfile}
+           />
         )}
       </main>
 

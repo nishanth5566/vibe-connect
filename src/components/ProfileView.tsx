@@ -8,14 +8,17 @@ import { motion } from "framer-motion";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import SettingsSheet from "@/components/SettingsSheet";
 import VerifiedBadge from "@/components/VerifiedBadge";
+ import EditProfileSheet from "@/components/settings/EditProfileSheet";
 
 interface ProfileViewProps {
   userProfile: UserProfile;
   onLogout: () => void;
+   onUpdateProfile: (profile: Partial<UserProfile>) => void;
 }
 
-const ProfileView = ({ userProfile, onLogout }: ProfileViewProps) => {
+ const ProfileView = ({ userProfile, onLogout, onUpdateProfile }: ProfileViewProps) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+   const [editProfileOpen, setEditProfileOpen] = useState(false);
   
   // Get vibes from user profile
   const userVibes = userProfile.vibes || [];
@@ -131,11 +134,22 @@ const ProfileView = ({ userProfile, onLogout }: ProfileViewProps) => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <Button className="w-full rounded-full mb-6 h-12" variant="outline">
+          <Button 
+            className="w-full rounded-full mb-6 h-12" 
+            variant="outline"
+            onClick={() => setEditProfileOpen(true)}
+          >
             <Edit3 className="w-4 h-4 mr-2" />
             Edit Profile
           </Button>
         </motion.div>
+         
+         <EditProfileSheet
+           open={editProfileOpen}
+           onOpenChange={setEditProfileOpen}
+           userProfile={userProfile}
+           onSave={onUpdateProfile}
+         />
 
         {/* Details */}
         <motion.div 
