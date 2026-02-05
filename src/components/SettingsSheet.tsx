@@ -25,6 +25,8 @@ import { usePermissions } from "@/hooks/usePermissions";
 import BlockedUsersSheet from "@/components/settings/BlockedUsersSheet";
 import HelpCenterSheet from "@/components/settings/HelpCenterSheet";
 import DeleteAccountDialog from "@/components/settings/DeleteAccountDialog";
+ import TermsOfServiceSheet from "@/components/settings/TermsOfServiceSheet";
+ import PrivacyPolicySheet from "@/components/settings/PrivacyPolicySheet";
 
 interface SettingsSheetProps {
   open: boolean;
@@ -97,6 +99,8 @@ const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => 
   const [blockedUsersOpen, setBlockedUsersOpen] = useState(false);
   const [helpCenterOpen, setHelpCenterOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+   const [termsOpen, setTermsOpen] = useState(false);
+   const [privacyOpen, setPrivacyOpen] = useState(false);
 
   // Load settings from localStorage
   useEffect(() => {
@@ -143,14 +147,6 @@ const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => 
     } else {
       setLocationSharing(false);
     }
-  };
-
-  const handleOpenTerms = () => {
-    window.open("https://radius.app/terms", "_blank");
-  };
-
-  const handleOpenPrivacy = () => {
-    window.open("https://radius.app/privacy", "_blank");
   };
 
   const handleDeleteAccount = () => {
@@ -354,16 +350,14 @@ const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => 
                   icon={<FileText className="w-5 h-5 text-primary" />}
                   label="Terms of Service"
                   description="Read our terms"
-                  onClick={handleOpenTerms}
-                  external
+                   onClick={() => setTermsOpen(true)}
                 />
                 <div className="h-px bg-border mx-3" />
                 <SettingItem
                   icon={<FileText className="w-5 h-5 text-primary" />}
                   label="Privacy Policy"
                   description="Read our privacy policy"
-                  onClick={handleOpenPrivacy}
-                  external
+                   onClick={() => setPrivacyOpen(true)}
                 />
               </div>
             </div>
@@ -401,6 +395,8 @@ const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => 
         onOpenChange={setDeleteDialogOpen}
         onConfirmDelete={handleDeleteAccount}
       />
+       <TermsOfServiceSheet open={termsOpen} onOpenChange={setTermsOpen} />
+       <PrivacyPolicySheet open={privacyOpen} onOpenChange={setPrivacyOpen} />
     </>
   );
 };
