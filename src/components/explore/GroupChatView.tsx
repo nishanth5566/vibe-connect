@@ -7,6 +7,7 @@ import { Group, GroupMember, GroupMessage, useGroupStore } from "@/hooks/useGrou
 import GroupOptionsSheet from "./GroupOptionsSheet";
 import UserProfileSheet from "./UserProfileSheet";
 import ReportUserDialog from "./ReportUserDialog";
+import ReportGroupDialog from "./ReportGroupDialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface GroupChatViewProps {
@@ -20,6 +21,7 @@ const GroupChatView = ({ group, onBack, onShowUserOnMap }: GroupChatViewProps) =
   const [showOptions, setShowOptions] = useState(false);
   const [selectedMember, setSelectedMember] = useState<GroupMember | null>(null);
   const [showReportDialog, setShowReportDialog] = useState(false);
+  const [showReportGroupDialog, setShowReportGroupDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -125,6 +127,15 @@ const GroupChatView = ({ group, onBack, onShowUserOnMap }: GroupChatViewProps) =
       description: `You left ${group.name}`,
     });
     onBack();
+  };
+
+  const handleReportGroup = (reason: string) => {
+    toast({
+      title: "Report submitted",
+      description: "Thank you for helping keep our community safe",
+    });
+    setShowReportGroupDialog(false);
+    setShowOptions(false);
   };
 
   const handleMediaUpload = () => {
@@ -285,6 +296,7 @@ const GroupChatView = ({ group, onBack, onShowUserOnMap }: GroupChatViewProps) =
         onClearChat={handleClearChat}
         onLeaveGroup={handleLeaveGroup}
         onMemberClick={handleMemberClick}
+        onReportGroup={() => setShowReportGroupDialog(true)}
       />
 
       {/* User Profile Sheet */}
@@ -306,12 +318,20 @@ const GroupChatView = ({ group, onBack, onShowUserOnMap }: GroupChatViewProps) =
         }}
       />
 
-      {/* Report Dialog */}
+      {/* Report User Dialog */}
       <ReportUserDialog
         open={showReportDialog}
         onOpenChange={setShowReportDialog}
         userName={selectedMember?.name || ""}
         onReport={handleReportUser}
+      />
+
+      {/* Report Group Dialog */}
+      <ReportGroupDialog
+        open={showReportGroupDialog}
+        onOpenChange={setShowReportGroupDialog}
+        groupName={group.name}
+        onReport={handleReportGroup}
       />
     </div>
   );
