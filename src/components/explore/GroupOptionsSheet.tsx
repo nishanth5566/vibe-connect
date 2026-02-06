@@ -8,7 +8,8 @@ import {
   Trash2, 
   LogOut, 
   Image,
-  Info
+  Info,
+  Flag
 } from "lucide-react";
 import { Group, GroupMember } from "@/hooks/useGroupStore";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ interface GroupOptionsSheetProps {
   onClearChat: () => void;
   onLeaveGroup: () => void;
   onMemberClick: (member: GroupMember) => void;
+  onReportGroup: () => void;
 }
 
 const GroupOptionsSheet = ({
@@ -32,6 +34,7 @@ const GroupOptionsSheet = ({
   onClearChat,
   onLeaveGroup,
   onMemberClick,
+  onReportGroup,
 }: GroupOptionsSheetProps) => {
   if (!group) return null;
 
@@ -155,6 +158,15 @@ const GroupOptionsSheet = ({
               >
                 <Trash2 className="w-5 h-5" />
                 Clear Chat
+              </Button>
+
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-3 h-12 text-destructive hover:text-destructive hover:bg-destructive/10"
+                onClick={onReportGroup}
+              >
+                <Flag className="w-5 h-5" />
+                Report Group
               </Button>
 
               <Button

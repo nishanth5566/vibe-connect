@@ -31,6 +31,9 @@ export interface Group {
   createdAt: string;
   description: string;
   gradient: string;
+  radiusKm?: number; // undefined = default/global group visible to everyone
+  isDefault?: boolean; // true = system-created group, visible to all
+  creatorId?: number; // who created the group
 }
 
 export interface BlockedUser {
@@ -56,6 +59,7 @@ const defaultGroups: Group[] = [
     gradient: "from-amber-500 to-orange-500",
     isMuted: false,
     isJoined: false,
+    isDefault: true,
     createdAt: new Date().toISOString(),
     members: [
       { id: 101, name: "Alex Chen", isAdmin: true, avatarColor: "from-amber-400 to-orange-500", isOnline: true, x: 75, y: 70 },
@@ -76,6 +80,7 @@ const defaultGroups: Group[] = [
     gradient: "from-purple-500 to-pink-500",
     isMuted: false,
     isJoined: false,
+    isDefault: true,
     createdAt: new Date().toISOString(),
     members: [
       { id: 201, name: "Sarah Kim", isAdmin: true, avatarColor: "from-purple-400 to-pink-500", isOnline: true, x: 40, y: 60 },
@@ -93,6 +98,7 @@ const defaultGroups: Group[] = [
     gradient: "from-green-500 to-emerald-500",
     isMuted: false,
     isJoined: false,
+    isDefault: true,
     createdAt: new Date().toISOString(),
     members: [
       { id: 301, name: "Jordan Lee", isAdmin: true, avatarColor: "from-green-400 to-emerald-500", isOnline: true, x: 30, y: 50 },
@@ -110,6 +116,7 @@ const defaultGroups: Group[] = [
     gradient: "from-blue-500 to-cyan-500",
     isMuted: false,
     isJoined: false,
+    isDefault: true,
     createdAt: new Date().toISOString(),
     members: [
       { id: 401, name: "Maya Patel", isAdmin: true, avatarColor: "from-blue-400 to-cyan-500", isOnline: false, x: 80, y: 65 },
@@ -124,6 +131,7 @@ const defaultGroups: Group[] = [
     gradient: "from-rose-500 to-red-500",
     isMuted: false,
     isJoined: false,
+    isDefault: true,
     createdAt: new Date().toISOString(),
     members: [
       { id: 501, name: "Liam Brooks", isAdmin: true, avatarColor: "from-rose-400 to-red-500", isOnline: true, x: 25, y: 75 },
@@ -138,6 +146,7 @@ const defaultGroups: Group[] = [
     gradient: "from-indigo-500 to-violet-500",
     isMuted: false,
     isJoined: false,
+    isDefault: true,
     createdAt: new Date().toISOString(),
     members: [
       { id: 601, name: "Emma Wilson", isAdmin: true, avatarColor: "from-indigo-400 to-violet-500", isOnline: true, x: 60, y: 80 },
@@ -152,6 +161,7 @@ const defaultGroups: Group[] = [
     gradient: "from-fuchsia-500 to-purple-500",
     isMuted: false,
     isJoined: false,
+    isDefault: true,
     createdAt: new Date().toISOString(),
     members: [
       { id: 701, name: "Ava Martinez", isAdmin: true, avatarColor: "from-fuchsia-400 to-purple-500", isOnline: false, x: 45, y: 25 },
@@ -274,6 +284,74 @@ export const useGroupStore = () => {
     return state.groups.find((g) => g.id === groupId);
   }, [state.groups]);
 
+  const createGroup = useCallback((groupData: {
+    name: string;
+    description: string;
+    vibe: string;
+    radiusKm: number;
+  }) => {
+    const vibeGradients: Record<string, string> = {
+      "Cafés": "from-amber-500 to-orange-500",
+      "Music": "from-purple-500 to-pink-500",
+      "Gaming": "from-green-500 to-emerald-500",
+      "Fitness": "from-blue-500 to-cyan-500",
+      "Reading": "from-rose-500 to-red-500",
+      "Photos": "from-indigo-500 to-violet-500",
+      "Creative": "from-fuchsia-500 to-purple-500",
+      "Food": "from-yellow-500 to-orange-500",
+      "Travel": "from-cyan-500 to-blue-500",
+      "Tech": "from-gray-500 to-slate-600",
+    };
+
+    const profile = localStorage.getItem("radius_profile");
+    const userName = profile ? JSON.parse(profile).name : "You";
+    
+    const newGroup: Group = {
+      id: Date.now(),
+      name: groupData.name,
+      description: groupData.description,
+      vibe: groupData.vibe,
+      gradient: vibeGradients[groupData.vibe] || "from-primary to-primary/80",
+      isMuted: false,
+      isJoined: true, // Creator automatically joins
+      isDefault: false,
+      radiusKm: groupData.radiusKm,
+      creatorId: 0, // Current user
+      createdAt: new Date().toISOString(),
+      members: [
+        {
+          id: 0,
+          name: userName,
+          isAdmin: true,
+          avatarColor: "from-primary to-primary/80",
+          isOnline: true,
+        },
+      ],
+      messages: [],
+    };
+
+    setState((prev) => ({
+      ...prev,
+      groups: [newGroup, ...prev.groups],
+    }));
+
+    return newGroup;
+  }, []);
+
+  // Get groups filtered by user's radius setting (for user-created groups)
+  const getVisibleGroups = useCallback((userRadiusKm: number) => {
+    return state.groups.filter((group) => {
+      // Default groups are always visible
+      if (group.isDefault) return true;
+      // User-created groups are visible if within their specified radius
+      // For now, we simulate this - in a real app, you'd calculate actual distance
+      if (group.radiusKm) {
+        return group.radiusKm >= userRadiusKm * 0.8; // Simulated proximity check
+      }
+      return true;
+    });
+  }, [state.groups]);
+
   return {
     groups: state.groups,
     blockedUsers: state.blockedUsers,
@@ -287,5 +365,7 @@ export const useGroupStore = () => {
     reportUser,
     isUserBlocked,
     getGroup,
+    createGroup,
+    getVisibleGroups,
   };
 };

@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { Users, LogIn, BellOff } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, LogIn, BellOff, Plus, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useGroupStore, GroupMember } from "@/hooks/useGroupStore";
 import GroupChatView from "./explore/GroupChatView";
+import CreateGroupSheet from "./explore/CreateGroupSheet";
 import { useToast } from "@/hooks/use-toast";
 
 interface ExploreViewProps {
@@ -12,10 +13,23 @@ interface ExploreViewProps {
 
 const ExploreView = ({ onShowUserOnMap }: ExploreViewProps) => {
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
-  const { groups, joinGroup, getGroup } = useGroupStore();
+  const [showCreateSheet, setShowCreateSheet] = useState(false);
+  const [userRadiusKm, setUserRadiusKm] = useState(2); // Default 2km
+  const { groups, joinGroup, getGroup, createGroup, getVisibleGroups } = useGroupStore();
   const { toast } = useToast();
 
+  // Load user's radius setting from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("radius_discovery_radius");
+    if (stored) {
+      setUserRadiusKm(parseFloat(stored));
+    }
+  }, []);
+
   const selectedGroup = selectedGroupId ? getGroup(selectedGroupId) : null;
+
+  // Filter groups based on visibility radius
+  const visibleGroups = getVisibleGroups(userRadiusKm);
 
   const handleJoinGroup = (groupId: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -40,6 +54,25 @@ const ExploreView = ({ onShowUserOnMap }: ExploreViewProps) => {
     setSelectedGroupId(null);
   };
 
+  const handleCreateGroup = (groupData: {
+    name: string;
+    description: string;
+    vibe: string;
+    radiusKm: number;
+  }) => {
+    createGroup(groupData);
+    toast({
+      title: "Group created!",
+      description: `${groupData.name} is now visible to users within ${groupData.radiusKm}km`,
+    });
+  };
+
+  const formatRadius = (km?: number) => {
+    if (!km) return null;
+    if (km < 1) return `${Math.round(km * 1000)}m`;
+    return `${km}km`;
+  };
+
   // Show group chat if a joined group is selected
   if (selectedGroup && selectedGroup.isJoined) {
     return (
@@ -55,13 +88,25 @@ const ExploreView = ({ onShowUserOnMap }: ExploreViewProps) => {
     <div className="h-full overflow-y-auto pb-24">
       {/* Header */}
       <div className="sticky top-0 bg-background/80 backdrop-blur-lg z-10 px-4 py-4 border-b border-border">
-        <h1 className="text-2xl font-bold text-foreground">Explore</h1>
-        <p className="text-muted-foreground text-sm">Groups based on your vibes</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Explore</h1>
+            <p className="text-muted-foreground text-sm">Groups based on your vibes</p>
+          </div>
+          <Button
+            onClick={() => setShowCreateSheet(true)}
+            size="sm"
+            className="gap-1.5"
+          >
+            <Plus className="w-4 h-4" />
+            Create
+          </Button>
+        </div>
       </div>
 
       {/* Groups Grid */}
       <div className="p-4 space-y-4">
-        {groups.map((group, index) => (
+        {visibleGroups.map((group, index) => (
           <button
             key={group.id}
             onClick={() => group.isJoined && handleOpenGroup(group.id)}
@@ -110,11 +155,17 @@ const ExploreView = ({ onShowUserOnMap }: ExploreViewProps) => {
               )}
             </div>
 
-            {/* Vibe Tag */}
-            <div className="mt-3 flex items-center gap-2">
+            {/* Vibe Tag & Radius */}
+            <div className="mt-3 flex items-center gap-2 flex-wrap">
               <span className="px-3 py-1 text-xs font-medium rounded-full bg-vibe-tag text-vibe-tag-text">
                 {group.vibe}
               </span>
+              {group.radiusKm && !group.isDefault && (
+                <span className="px-2 py-1 text-xs font-medium rounded-full bg-muted text-muted-foreground flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />
+                  {formatRadius(group.radiusKm)}
+                </span>
+              )}
               <span className="text-xs text-muted-foreground">
                 {group.members.length} people nearby
               </span>
@@ -127,6 +178,13 @@ const ExploreView = ({ onShowUserOnMap }: ExploreViewProps) => {
           </button>
         ))}
       </div>
+
+      {/* Create Group Sheet */}
+      <CreateGroupSheet
+        open={showCreateSheet}
+        onOpenChange={setShowCreateSheet}
+        onCreateGroup={handleCreateGroup}
+      />
     </div>
   );
 };
