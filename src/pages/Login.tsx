@@ -4,8 +4,9 @@
  import { Input } from "@/components/ui/input";
  import { Label } from "@/components/ui/label";
  import { Eye, EyeOff, MapPin } from "lucide-react";
- import TermsOfServiceSheet from "@/components/settings/TermsOfServiceSheet";
- import PrivacyPolicySheet from "@/components/settings/PrivacyPolicySheet";
+import TermsOfServiceSheet from "@/components/settings/TermsOfServiceSheet";
+import PrivacyPolicySheet from "@/components/settings/PrivacyPolicySheet";
+import ForgotPasswordSheet from "@/components/settings/ForgotPasswordSheet";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -18,8 +19,9 @@ const Login = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
  
-   const [termsOpen, setTermsOpen] = useState(false);
-   const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -189,7 +191,11 @@ const Login = () => {
 
           {/* Forgot Password */}
           {isLogin && (
-            <button className="w-full text-center text-sm text-muted-foreground hover:text-primary mt-4 transition-colors">
+            <button
+              type="button"
+              onClick={() => setForgotPasswordOpen(true)}
+              className="w-full text-center text-sm text-muted-foreground hover:text-primary mt-4 transition-colors"
+            >
               Forgot your password?
             </button>
           )}
@@ -208,8 +214,9 @@ const Login = () => {
         </p>
       </div>
  
-       <TermsOfServiceSheet open={termsOpen} onOpenChange={setTermsOpen} />
-       <PrivacyPolicySheet open={privacyOpen} onOpenChange={setPrivacyOpen} />
+      <TermsOfServiceSheet open={termsOpen} onOpenChange={setTermsOpen} />
+      <PrivacyPolicySheet open={privacyOpen} onOpenChange={setPrivacyOpen} />
+      <ForgotPasswordSheet open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen} />
     </div>
   );
 };
