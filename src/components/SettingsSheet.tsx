@@ -297,19 +297,34 @@ const SettingsSheet = ({ open, onOpenChange, onLogout }: SettingsSheetProps) => 
                     <p className="font-medium text-foreground">Discovery Radius</p>
                     <p className="text-xs text-muted-foreground">Find people within {formatRadius(discoveryRadius[0])}</p>
                   </div>
-                  <span className="text-sm font-semibold text-primary">{formatRadius(discoveryRadius[0])}</span>
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="number"
+                      value={discoveryRadius[0]}
+                      onChange={(e) => {
+                        const val = Math.min(20, Math.max(0.1, Number(e.target.value) || 0.1));
+                        setDiscoveryRadius([val]);
+                      }}
+                      className="w-12 bg-transparent text-right font-semibold text-primary border-b border-primary/50 focus:outline-none focus:border-primary text-sm"
+                      min={0.1}
+                      max={20}
+                      step={0.1}
+                    />
+                    <span className="text-sm font-semibold text-primary">km</span>
+                  </div>
                 </div>
                 <Slider
                   value={discoveryRadius}
                   onValueChange={setDiscoveryRadius}
                   min={0.1}
-                  max={5}
+                  max={20}
                   step={0.1}
                   className="w-full"
                 />
                 <div className="flex justify-between mt-2 text-xs text-muted-foreground">
                   <span>100m</span>
-                  <span>5km</span>
+                  <span>10km</span>
+                  <span>20km</span>
                 </div>
               </div>
             </div>

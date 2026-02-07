@@ -35,6 +35,7 @@ const GroupChatView = ({ group, onBack, onShowUserOnMap }: GroupChatViewProps) =
     reportUser,
     isUserBlocked,
     getGroup,
+    deleteGroup,
   } = useGroupStore();
 
   const currentGroup = getGroup(group.id) || group;
@@ -136,6 +137,15 @@ const GroupChatView = ({ group, onBack, onShowUserOnMap }: GroupChatViewProps) =
     });
     setShowReportGroupDialog(false);
     setShowOptions(false);
+  };
+
+  const handleDeleteGroup = () => {
+    deleteGroup(group.id);
+    toast({
+      title: "Group deleted",
+      description: `${group.name} has been deleted`,
+    });
+    onBack();
   };
 
   const handleMediaUpload = () => {
@@ -297,6 +307,7 @@ const GroupChatView = ({ group, onBack, onShowUserOnMap }: GroupChatViewProps) =
         onLeaveGroup={handleLeaveGroup}
         onMemberClick={handleMemberClick}
         onReportGroup={() => setShowReportGroupDialog(true)}
+        onDeleteGroup={!group.isDefault ? handleDeleteGroup : undefined}
       />
 
       {/* User Profile Sheet */}

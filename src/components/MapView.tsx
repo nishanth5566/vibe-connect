@@ -125,28 +125,35 @@ const MapView = ({ onOpenChat, highlightedUser }: MapViewProps) => {
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground font-medium">Search Radius</span>
-              <motion.span
-                key={radius}
-                initial={{ scale: 1.2, color: "hsl(var(--primary))" }}
-                animate={{ scale: 1, color: "hsl(var(--foreground))" }}
-                className="font-bold text-foreground"
-              >
-                {radius} km
-              </motion.span>
+              <div className="flex items-center gap-1">
+                <input
+                  type="number"
+                  value={radius}
+                  onChange={(e) => {
+                    const val = Math.min(20, Math.max(1, Number(e.target.value) || 1));
+                    setRadius(val);
+                    setCurrentPersonIndex(0);
+                  }}
+                  className="w-12 bg-transparent text-right font-bold text-foreground border-b border-primary/50 focus:outline-none focus:border-primary"
+                  min={1}
+                  max={20}
+                />
+                <span className="font-bold text-foreground">km</span>
+              </div>
             </div>
             <div className="relative">
               <Slider
                 value={[radius]}
                 onValueChange={handleRadiusChange}
                 min={1}
-                max={100}
+                max={20}
                 step={1}
                 className="w-full"
               />
               <div className="flex justify-between mt-1.5 text-xs text-muted-foreground">
                 <span>1km</span>
-                <span>50km</span>
-                <span>100km</span>
+                <span>10km</span>
+                <span>20km</span>
               </div>
             </div>
           </div>

@@ -339,18 +339,30 @@ export const useGroupStore = () => {
   }, []);
 
   // Get groups filtered by user's radius setting (for user-created groups)
-  const getVisibleGroups = useCallback((userRadiusKm: number) => {
+  // A group with radiusKm of X is only visible to users within X km
+  // We simulate user distance as a random value for demo purposes
+  const getVisibleGroups = useCallback((userDistanceKm: number) => {
     return state.groups.filter((group) => {
-      // Default groups are always visible
+      // Default groups are always visible to everyone
       if (group.isDefault) return true;
-      // User-created groups are visible if within their specified radius
-      // For now, we simulate this - in a real app, you'd calculate actual distance
-      if (group.radiusKm) {
-        return group.radiusKm >= userRadiusKm * 0.8; // Simulated proximity check
+      // User-created groups: only visible if user is within the group's radius
+      // userDistanceKm represents how far the user is from the group creator
+      // For demo: we assume user is at a simulated distance
+      if (group.radiusKm !== undefined) {
+        // User must be within the group's visibility radius
+        return userDistanceKm <= group.radiusKm;
       }
       return true;
     });
   }, [state.groups]);
+
+  // Delete a user-created group (only non-default groups can be deleted)
+  const deleteGroup = useCallback((groupId: number) => {
+    setState((prev) => ({
+      ...prev,
+      groups: prev.groups.filter((g) => g.id !== groupId || g.isDefault),
+    }));
+  }, []);
 
   return {
     groups: state.groups,
@@ -367,5 +379,6 @@ export const useGroupStore = () => {
     getGroup,
     createGroup,
     getVisibleGroups,
+    deleteGroup,
   };
 };
