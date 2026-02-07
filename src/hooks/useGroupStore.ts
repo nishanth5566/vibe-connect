@@ -34,6 +34,7 @@ export interface Group {
   radiusKm?: number; // undefined = default/global group visible to everyone
   isDefault?: boolean; // true = system-created group, visible to all
   creatorId?: number; // who created the group
+  profileImage?: string; // base64 or URL for group profile picture
 }
 
 export interface BlockedUser {
@@ -289,6 +290,7 @@ export const useGroupStore = () => {
     description: string;
     vibe: string;
     radiusKm: number;
+    profileImage?: string;
   }) => {
     const vibeGradients: Record<string, string> = {
       "Cafés": "from-amber-500 to-orange-500",
@@ -318,6 +320,7 @@ export const useGroupStore = () => {
       radiusKm: groupData.radiusKm,
       creatorId: 0, // Current user
       createdAt: new Date().toISOString(),
+      profileImage: groupData.profileImage,
       members: [
         {
           id: 0,
