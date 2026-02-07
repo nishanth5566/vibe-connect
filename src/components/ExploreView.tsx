@@ -52,6 +52,7 @@ const ExploreView = ({ onShowUserOnMap }: ExploreViewProps) => {
     description: string;
     vibe: string;
     radiusKm: number;
+    profileImage?: string;
   }) => {
     createGroup(groupData);
     toast({
@@ -111,12 +112,20 @@ const ExploreView = ({ onShowUserOnMap }: ExploreViewProps) => {
             style={{ animationDelay: `${index * 50}ms` }}
           >
             <div className="flex items-center gap-4">
-              {/* Icon */}
+              {/* Icon/Profile Image */}
               <div className={cn(
-                "w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br relative",
+                "w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br relative overflow-hidden",
                 group.gradient
               )}>
-                <Users className="w-7 h-7 text-primary-foreground" />
+                {group.profileImage ? (
+                  <img
+                    src={group.profileImage}
+                    alt={group.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Users className="w-7 h-7 text-primary-foreground" />
+                )}
                 {group.isMuted && (
                   <div className="absolute -top-1 -right-1 w-5 h-5 bg-muted rounded-full flex items-center justify-center">
                     <BellOff className="w-3 h-3 text-muted-foreground" />
