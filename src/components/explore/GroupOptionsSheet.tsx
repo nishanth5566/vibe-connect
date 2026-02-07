@@ -24,6 +24,7 @@ interface GroupOptionsSheetProps {
   onLeaveGroup: () => void;
   onMemberClick: (member: GroupMember) => void;
   onReportGroup: () => void;
+  onDeleteGroup?: () => void;
 }
 
 const GroupOptionsSheet = ({
@@ -35,6 +36,7 @@ const GroupOptionsSheet = ({
   onLeaveGroup,
   onMemberClick,
   onReportGroup,
+  onDeleteGroup,
 }: GroupOptionsSheetProps) => {
   if (!group) return null;
 
@@ -168,6 +170,18 @@ const GroupOptionsSheet = ({
                 <Flag className="w-5 h-5" />
                 Report Group
               </Button>
+
+              {/* Delete Group - only for user-created groups */}
+              {!group.isDefault && onDeleteGroup && (
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 h-12 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={onDeleteGroup}
+                >
+                  <Trash2 className="w-5 h-5" />
+                  Delete Group
+                </Button>
+              )}
 
               <Button
                 variant="ghost"

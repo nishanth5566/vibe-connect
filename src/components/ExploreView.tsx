@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Users, LogIn, BellOff, Plus, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -14,22 +14,15 @@ interface ExploreViewProps {
 const ExploreView = ({ onShowUserOnMap }: ExploreViewProps) => {
   const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
   const [showCreateSheet, setShowCreateSheet] = useState(false);
-  const [userRadiusKm, setUserRadiusKm] = useState(2); // Default 2km
+  const [userDistanceKm] = useState(() => Math.random() * 3); // Simulated user distance from group creators (0-3km)
   const { groups, joinGroup, getGroup, createGroup, getVisibleGroups } = useGroupStore();
   const { toast } = useToast();
-
-  // Load user's radius setting from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem("radius_discovery_radius");
-    if (stored) {
-      setUserRadiusKm(parseFloat(stored));
-    }
-  }, []);
 
   const selectedGroup = selectedGroupId ? getGroup(selectedGroupId) : null;
 
   // Filter groups based on visibility radius
-  const visibleGroups = getVisibleGroups(userRadiusKm);
+  // Default groups are always visible, user-created groups only if within their radius
+  const visibleGroups = getVisibleGroups(userDistanceKm);
 
   const handleJoinGroup = (groupId: number, e: React.MouseEvent) => {
     e.stopPropagation();
