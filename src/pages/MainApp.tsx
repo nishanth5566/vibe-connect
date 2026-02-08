@@ -5,6 +5,7 @@ import MapView from "@/components/MapView";
 import ExploreView from "@/components/ExploreView";
 import ChatsView from "@/components/ChatsView";
 import ProfileView from "@/components/ProfileView";
+import PermissionsPrompt from "@/components/PermissionsPrompt";
 import { GroupMember } from "@/hooks/useGroupStore";
 
 export interface UserProfile {
@@ -100,6 +101,9 @@ const MainApp = () => {
 
       {/* Bottom Navigation */}
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+
+      {/* Permissions Prompt */}
+      <PermissionsPrompt />
     </div>
   );
 };

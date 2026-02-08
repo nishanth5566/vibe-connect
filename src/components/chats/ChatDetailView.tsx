@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Send, MoreVertical, Image, Paperclip, Phone, Video, Check, CheckCheck } from "lucide-react";
+import { ArrowLeft, Send, MoreVertical, Image, Paperclip, Check, CheckCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,6 @@ import ContactProfileSheet from "./ContactProfileSheet";
 import DeleteChatDialog from "./DeleteChatDialog";
 import ReportUserDialog from "../explore/ReportUserDialog";
 import { useToast } from "@/hooks/use-toast";
-
 interface ChatDetailViewProps {
   conversation: Conversation;
   onBack: () => void;
@@ -124,12 +123,6 @@ const ChatDetailView = ({ conversation, onBack, onShowOnMap }: ChatDetailViewPro
     });
   };
 
-  const handleCall = (type: "voice" | "video") => {
-    toast({
-      title: "Coming soon",
-      description: `${type === "voice" ? "Voice" : "Video"} calls will be available soon`,
-    });
-  };
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -170,21 +163,6 @@ const ChatDetailView = ({ conversation, onBack, onShowOnMap }: ChatDetailViewPro
           </div>
         </button>
 
-        {/* Call Buttons */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => handleCall("video")}
-        >
-          <Video className="w-5 h-5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => handleCall("voice")}
-        >
-          <Phone className="w-5 h-5" />
-        </Button>
         <Button
           variant="ghost"
           size="icon"
