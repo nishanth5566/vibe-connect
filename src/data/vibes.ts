@@ -20,6 +20,6 @@ export const vibeOptions = [
   { id: "nature", label: "Nature", emoji: "🌿" },
   { id: "tech", label: "Tech", emoji: "💻" },
   { id: "foodie", label: "Foodie", emoji: "🍜" },
-] as const;
+];
 
 export type VibeId = typeof vibeOptions[number]["id"];
