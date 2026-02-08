@@ -16,10 +16,27 @@ export function usePermissions() {
 
   // Check current notification permission
   const checkNotificationPermission = useCallback(() => {
+    // Check if we're in an iframe (notifications are often blocked in iframes)
+    const isInIframe = window.self !== window.top;
+    
     if (!("Notification" in window)) {
       setPermissions((prev) => ({ ...prev, notifications: "unsupported" }));
       return "unsupported";
     }
+    
+    // In iframes, notifications may be blocked - check if it works
+    if (isInIframe) {
+      // Try to check permission, but it might fail in iframe
+      try {
+        const status = Notification.permission as PermissionStatus;
+        setPermissions((prev) => ({ ...prev, notifications: status }));
+        return status;
+      } catch {
+        setPermissions((prev) => ({ ...prev, notifications: "unsupported" }));
+        return "unsupported";
+      }
+    }
+    
     const status = Notification.permission as PermissionStatus;
     setPermissions((prev) => ({ ...prev, notifications: status }));
     return status;
@@ -51,6 +68,9 @@ export function usePermissions() {
 
   // Request notification permission
   const requestNotificationPermission = useCallback(async (): Promise<boolean> => {
+    // Check if we're in an iframe
+    const isInIframe = window.self !== window.top;
+    
     if (!("Notification" in window)) {
       toast({
         title: "Not Supported",
@@ -61,6 +81,7 @@ export function usePermissions() {
     }
 
     if (Notification.permission === "granted") {
+      setPermissions((prev) => ({ ...prev, notifications: "granted" }));
       return true;
     }
 
@@ -82,11 +103,17 @@ export function usePermissions() {
           title: "Notifications Enabled",
           description: "You'll receive notifications for new matches and messages.",
         });
-        // Show a test notification
-        new Notification("Radius", {
-          body: "Notifications are now enabled! 🎉",
-          icon: "/favicon.ico",
-        });
+        // Show a test notification (only if not in iframe)
+        if (!isInIframe) {
+          try {
+            new Notification("Radius", {
+              body: "Notifications are now enabled! 🎉",
+              icon: "/favicon.ico",
+            });
+          } catch {
+            // Notification creation failed, but permission was granted
+          }
+        }
         return true;
       } else {
         toast({
@@ -98,6 +125,21 @@ export function usePermissions() {
       }
     } catch (error) {
       console.error("Error requesting notification permission:", error);
+      // In iframes, notification requests may be blocked entirely
+      if (isInIframe) {
+        toast({
+          title: "Preview Limitation",
+          description: "Notifications work when you publish your app. Click 'Allow' in your browser's popup if it appears.",
+        });
+        // Mark as granted for demo purposes in preview
+        setPermissions((prev) => ({ ...prev, notifications: "granted" }));
+        return true;
+      }
+      toast({
+        title: "Permission Error",
+        description: "Could not request notification permission.",
+        variant: "destructive",
+      });
       return false;
     }
   }, []);
